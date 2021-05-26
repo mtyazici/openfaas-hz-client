@@ -1,4 +1,4 @@
-name: guide-name    # Use repository name. It will be the endpoint for the guide
-title: Guide Title  # A brief module title. This will not show up on the website.
+name: openfaas-hz-client    # Use repository name. It will be the endpoint for the guide
+title: Use Hazelcast with OpenFaaS  # A brief module title. This will not show up on the website.
 version: master
 
