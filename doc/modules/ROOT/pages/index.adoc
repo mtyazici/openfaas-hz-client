@@ -129,7 +129,7 @@ helm install hz-hazelcast hazelcast/hazelcast
 ```
 == Create Function with Hazelcast Client
 
-OpenFaaS CLI provides function templates for different runtime environments and watch-dogs. We are going to implement the functions in Java, Python and NodeJs. We will be using both `of-watchdog` and `Classic Watchdog`. By using `of-watchdog` we can preserve the database connections, so our clients do not need to connect to the cluster after each function call. You can find more information on watchdogs (here)[https://docs.openfaas.com/architecture/watchdog/].
+OpenFaaS CLI provides function templates for different runtime environments and watch-dogs. We are going to implement the functions in Java, Python and NodeJs. We will be using both `of-watchdog` and `Classic Watchdog`. By using `of-watchdog` we can preserve the database connections, so our clients do not need to connect to the cluster after each function call. You can find more information on watchdogs https://docs.openfaas.com/architecture/watchdog/[here].
 
 Clone the repository from {templates-url}[here] and `cd` into the repository
 
