@@ -19,9 +19,9 @@ include::{templates-url}/link-to-repo.adoc[]
 
 With the popularity of Function as a Service (FaaS) rising, Kubernetes was also brought into it. OpenFaaS is one of the projects that allows you to deploy serverless functions onto Kubernetes.
 
-Serverless functions were designed to be stateless, however this slows down the functions for some use cases, generally connection set-up time holds a considerable portion of the response time. OpenFaaS with the use of `of-watchdog`, partially solves this problem by allowing functions to be able to hold their states between calls. This approach helps Hazelcast because now the clients in the functions can persist their connection with the cluster between function calls, thus allowing faster response times.
+Serverless functions are designed to be stateless, however this slows down the functions for some use cases, generally connection set-up time holds a considerable portion of the response time. OpenFaaS with the use of `of-watchdog`, partially solves this problem by allowing functions to be able to hold their states between calls. This approach helps Hazelcast because now the clients in the functions can persist their connection with the cluster between function calls, thus allowing faster response times.
 
-In the guide, we will deploy OpenFaaS onto Kubernetes. We will also create a Hazelcast cluster and deploy OpenFaaS functions with Hazelcast Clients in them. We will use Java, Python and Nodejs clients and we will compare the response times of functions created with `of-watchdog` and `Classical Watchdog`.
+In the guide, we will deploy OpenFaaS on Kubernetes. We will also create a Hazelcast cluster and deploy OpenFaaS functions with Hazelcast clients in them. We will use Java, Python and Nodejs clients and we will compare the response times of functions created with `of-watchdog` and `Classical Watchdog`.
 
 == Prerequisites
 
@@ -75,6 +75,18 @@ helm repo update \
 --set generateBasicAuth=true
 ```
 
+Run the following command to see to see OpenFaaS is deployed.
+```
+$ kubectl get pods -n openfaas
+NAME                                READY   STATUS    RESTARTS   AGE
+alertmanager-6b5857bbd4-fbkrk       1/1     Running   0          17m
+basic-auth-plugin-b9cd7fb66-whmbh   1/1     Running   0          17m
+gateway-78cbb75d4c-hkqch            2/2     Running   0          17m
+nats-6b6564d858-j7l8w               1/1     Running   0          17m
+prometheus-6f699b4d87-jshv8         1/1     Running   0          17m
+queue-worker-5f6cb648db-hgwgq       1/1     Running   0          17m
+```
+
 === Log-in to OpenFaaS
 
 Wait for gateway to be ready.
@@ -117,9 +129,9 @@ echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 
 You can also see and call your functions from a browser. Go to your `$OPENFAAS_URL` and provide username and password as `admin` and `$PASSWORD`.
 
-== Deploy Hazelcast Cluster onto Kubernetes 
+== Deploy Hazelcast Cluster on Kubernetes 
 
-We will deploy Hazelcast cluster using Helm. This will deploy the Helm chart on whatever namespace you run it.
+The functions we deploy with OpenFaaS will have Hazelcast clients in them. So we will need a Hazelcast cluster on the same Kubernetes cluster. We will deploy the Hazelcast cluster using Helm. The following code snippet will deploy the Hazelcast Helm chart on whatever namespace you run it.
 
 [bash]
 ```
@@ -129,7 +141,7 @@ helm install hz-hazelcast hazelcast/hazelcast
 ```
 == Create Function with Hazelcast Client
 
-OpenFaaS CLI provides function templates for different runtime environments and watch-dogs. We are going to implement the functions in Java, Python and NodeJs. We will be using both `of-watchdog` and `Classic Watchdog`. By using `of-watchdog` we can preserve the database connections, so our clients do not need to connect to the cluster after each function call. You can find more information on watchdogs https://docs.openfaas.com/architecture/watchdog/[here].
+OpenFaaS CLI provides function templates for different runtime environments and watchdogs. We are going to implement the functions in Java, Python and NodeJs. We will be using both `of-watchdog` and `Classic Watchdog`. By using `of-watchdog` we will preserve the database connections, so our clients will not need to connect to the cluster after each function call. You can find more information on watchdogs https://docs.openfaas.com/architecture/watchdog/[here].
 
 Clone the repository from {templates-url}[here] and `cd` into the repository
 
@@ -138,55 +150,28 @@ Clone the repository from {templates-url}[here] and `cd` into the repository
 Java::
 +
 --
-You can either use completed functions under the `hz-client-java` folder, or you can build your functions using templates and `faas-cli`. 
-
-If you choose to use completed functions, `cd` into `hz-client-java/of-watchdog`. You need to change `image` part in `hz-client-java-ofwatchdog.yml` to your Docker Hub username.
+We will use the function under `hz-client-java/of-watchdog`. `cd` into `hz-client-java/of-watchdog`. You need to change `image` part in `hz-client-java-ofwatchdog.yml` to your Docker Hub username.
 
 NOTE: If you are not using a local Kubernetes cluster, you will also need to change the `gateway` section in `hz-client-java-ofwatchdog.yml` with the value of `OPENFAAS_URL` environment variable you created before.
+
+NOTE: If you deployed your Hazelcast cluster in a namespace other than `default` do not forget to change the `default` in `config.getNetworkConfig().addAddress` to your namespace in the file `hz-client-java-ofwatchdog/src/.../Handler.java'.
 
 After the change you can build, push and deploy your functions using the following command.
 ```
 faas-cli up -f hz-client-java-ofwatchdog.yml  
 ```
 
-If you choose to create your function using templates, run the following commands. You can choose to run these commands in a newly created directory.
-[bash]
-```
-# Pulls the templates for different runtimes, watchdogs for these templates can be found at https://github.com/openfaas/templates#classic-templates
-faas-cli template pull 
-
-# Create a new java11 function named hz-client-java-ofwatchdog , Docker Hub prefix will be your username
-faas-cli new --lang java11 hz-client-java-ofwatchdog --prefix="YOUR_DOCKER_HUB_USERNAME"
-```
-
-Your template is now created. Copy the contents of `functions/java-handler.java` into `hz-client-java-ofwatchdog/src/.../Handler.java'.
-
-NOTE: If you deployed your Hazelcast cluster in a different namespace other than `default` do not forget to change the `default` in `cluster_members` to your namespace in the file `hz-client-java-ofwatchdog/src/.../Handler.java'.
-
-
-Add following to `dependencies` section in `hz-client-java-ofwatchdog/build.gradle`
-[gradle]
-```
-    compile 'com.hazelcast:hazelcast-all:4.2'
-```
-
-Now you can build, push and deploy your functions using the following command.
-
-```
-faas-cli up -f hz-client-java-ofwatchdog.yml  
-```
-
-
 --
 
 Python::
 +
 --
-You can either use completed functions under the `hz-client-python` folder or you can build your functions using templates and `faas-cli`. 
 
-If you choose to use completed functions, cd into `hz-client-python/of-watchdog`. You need to change `image` part in `hz-client-python-ofwatchdog.yml` to your Docker Hub username
+We will use the function under `hz-client-python/of-watchdog`. `cd` into `hz-client-python/of-watchdog`. You need to change `image` part in `hz-client-python-ofwatchdog.yml` to your Docker Hub username
 
 NOTE: If you are not using a local Kubernetes cluster, you will also need to change the `gateway` section in `hz-client-python-ofwatchdog.yml` with the value of `OPENFAAS_URL` environment variable you created before.
+
+NOTE: If you deployed your Hazelcast cluster in a namespace other than `default` do not forget to change the `default` in `cluster_members` to your namespace in the file 'hz-client-python-ofwatchdog/handler.py'.
 
 After the change you can build, push and deploy your functions by the following command.
 
@@ -195,72 +180,24 @@ faas template pull https://github.com/openfaas-incubator/python-flask-template #
 faas-cli up -f  hz-client-python-ofwatchdog.yml  --build-arg "TEST_ENABLED=false"
 ```
 
-If you choose to create your function using templates, run the following commands. You can choose to run these commands in a newly created directory.
-[bash]
-```
-# Pulls the templates that has python3 flask with ofwatchdog, you can learn more about watchdogs here https://github.com/openfaas/templates#classic-templates
-faas template pull https://github.com/openfaas-incubator/python-flask-template
 
-# Create a new python3-flask function named hz-client-python-ofwatchdog, Docker Hub prefix will be your username
-faas-cli new --lang python3-flask hz-client-python-ofwatchdog --prefix="YOUR_DOCKER_HUB_USERNAME"
-```
-
-Your template is now created. Copy the contents of `functions/python-handler.py` into 'hz-client-python-ofwatchdog/handler.py'.
-
-NOTE: If you deployed your Hazelcast cluster in a different namespace other than `default` do not forget to change the `default` in `cluster_members` to your namespace in the file 'hz-client-python-ofwatchdog/handler.py'.
-
-Add the following to `hz-client-python-ofwatchdog/requirements.txt`
-
-```
-hazelcast-python-client
-```
-
-Now you can build, push and deploy your functions by the following command.
-
-```
-faas template pull https://github.com/openfaas-incubator/python-flask-template
-faas-cli up -f  hz-client-python-ofwatchdog.yml  --build-arg "TEST_ENABLED=false"
-```
 --
 
 Nodejs::
 +
 --
-You can either use completed functions under the `hz-client-node` folder, or you can build your functions using `faas-cli` and templates. 
 
-If you choose to use completed functions, cd into `hz-client-node/of-watchdog`. You need to change `image` part in `hz-client-node-ofwatchdog.yml` to your Docker Hub username.
+We will use the function under `hz-client-node/of-watchdog`. `cd` into `hz-client-node/of-watchdog`. You need to change `image` part in `hz-client-node-ofwatchdog.yml` to your Docker Hub username.
 
 NOTE: If you are not using a local Kubernetes cluster, you will also need to change the `gateway` section in `hz-client-node-ofwatchdog.yml` with the value of `OPENFAAS_URL` environment variable you created before.
+
+NOTE: If you deployed your Hazelcast cluster in a namespace other than `default` do not forget to change the `default` in `clusterMembers` to your namespace in the file 'hz-client-node-ofwatchdog/handler.js'.
 
 After the change you can build, push and deploy your functions by the following command.
 ```
 faas-cli up -f hz-client-node-ofwatchdog.yml
 ```
 
-If you choose to create your function using templates, run the following commands. You can choose to run these commands in a newly created directory.
-[bash]
-```
-# Pulls the templates for different runtimes, watchdogs for these templates can be found at https://github.com/openfaas/templates#classic-templates
-faas-cli template pull 
-
-# Create a new node14 function named hz-client-node-ofwatchdog.yml, Docker Hub prefix will be your username
-faas-cli new --lang node14 hz-client-node-ofwatchdog.yml --prefix="YOUR_DOCKER_HUB_USERNAME"
-```
-
-Your template is now created. Copy the contents on `functions/node-handler.js` into 'hz-client-node-ofwatchdog/handler.js'.
-
-NOTE: If you deployed your Hazelcast cluster in a different namespace other than `default` do not forget to change the `default` in `cluster_members` to your namespace in the file 'hz-client-node-ofwatchdog/handler.js'.
-
-Add following to `dependencies` section in `hz-client-node-ofwatchdog/package.json`
-```
-"hazelcast-client": "^4.1.0"
-```
-
-Now you can build, push and deploy your functions by the following command.
-
-```
-faas-cli up -f hz-node-client-ofwatchdog.yml  
-```
 
 --
 ====
@@ -319,9 +256,9 @@ Python::
 --
 Change the `image` section in `hz-client-python/classic-watchdog/hz-client-python-classic.yml`.
 
-NOTE: If you are not using a local Kubernetes cluster, you will also need to change the `gateway` section in `hz-client-java-classic.yml` with the value of `OPENFAAS_URL` environment variable you created before.
+NOTE: If you are not using a local Kubernetes cluster, you will also need to change the `gateway` section in `hz-client-python-classic.yml` with the value of `OPENFAAS_URL` environment variable you created before.
 
-NOTE: If you deployed your Hazelcast cluster in a different namespace other than `default` do not forget to change the `default` in `cluster_members` to your namespace in the file `hz-client-python-classic/handler.py`.
+NOTE: If you deployed your Hazelcast cluster in a namespace other than `default` do not forget to change the `default` in `cluster_members` to your namespace in the file 'hz-client-python-classic/handler.py'.
 
 Now, you can deploy the function with the following command.
 
@@ -342,9 +279,9 @@ Nodejs::
 --
 Change the `image` section in `hz-client-node/classic-watchdog/hz-client-node-classic.yml`.
 
-NOTE: If you are not using a local Kubernetes cluster, you will also need to change the `gateway` section in `hz-client-java-classic.yml` with the value of `OPENFAAS_URL` environment variable you created before.
+NOTE: If you are not using a local Kubernetes cluster, you will also need to change the `gateway` section in `hz-client-node-ofwatchdog.yml` with the value of `OPENFAAS_URL` environment variable you created before.
 
-NOTE: If you deployed your Hazelcast cluster in a different namespace other than `default` do not forget to change the `default` in `cluster_members` to your namespace in the file `hz-client-node-classic/handler.js`.
+NOTE: If you deployed your Hazelcast cluster in a namespace other than `default` do not forget to change the `default` in `clusterMembers` to your namespace in the file 'hz-client-node-classic/handler.js'.
 
 Now, you can deploy the function with the following command.
 
