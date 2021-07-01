@@ -80,7 +80,7 @@ jobs:
       - name: Test Function
         working-directory: openfaas-hz-guide/hz-client-node/of-watchdog
         run: |
-          kubectl get all -n openfaas
+          kubectl get all -n openfaas-fn
 
           kubectl rollout status -n openfaas-fn deployment.apps/hz-client-node-ofwatchdog 
 
@@ -88,8 +88,8 @@ jobs:
 
           hey -n 100 -c 1 ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog
 
-          size=$(curl ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog)
-
+          curl ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog >> size.json
+          size=$(cat size.json | jq -r '.body')
           echo $size
 
           if [[ $size -le 101 ]] && [[ $size -ge 100 ]];
