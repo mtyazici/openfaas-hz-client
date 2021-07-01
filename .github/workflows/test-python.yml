@@ -70,6 +70,8 @@ jobs:
       - name: Create Function
         working-directory: openfaas-hz-guide/hz-client-python/of-watchdog
         run: |
+          faas template pull https://github.com/openfaas-incubator/python-flask-template
+          
           docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
           echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 
