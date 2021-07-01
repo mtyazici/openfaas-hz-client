@@ -88,6 +88,8 @@ jobs:
 
           hey -n 100 -c 1 ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog
 
+          kubectl get all -n openfaas
+
           size=$(curl ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog)
 
           echo $size
