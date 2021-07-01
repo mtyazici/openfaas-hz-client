@@ -68,7 +68,7 @@ helm repo update \
 --set generateBasicAuth=true
 ```
 
-Run the following command to see to see OpenFaaS is deployed.
+Run the following command to see OpenFaaS is deployed.
 ```
 $ kubectl get pods -n openfaas
 NAME                                READY   STATUS    RESTARTS   AGE
