@@ -16,7 +16,6 @@ import static com.hazelcast.client.impl.spi.impl.discovery.HazelcastCloudDiscove
 import static com.hazelcast.client.properties.ClientProperty.HAZELCAST_CLOUD_DISCOVERY_TOKEN;
 import static com.hazelcast.client.properties.ClientProperty.STATISTICS_ENABLED;
 
-
 public class Handler extends com.openfaas.model.AbstractHandler {
 
     HazelcastInstance client;

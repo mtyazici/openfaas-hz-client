@@ -18,3 +18,4 @@ def handle(req):
     my_map.put(f"{ran_val}", "value")
 
     return str(my_map.size())
+

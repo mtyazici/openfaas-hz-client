@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "hz-client-python/*"
+      - "hz-client-python/**"
       - "functions/python-handler.py"
 
 jobs:

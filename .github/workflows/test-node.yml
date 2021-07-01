@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "hz-client-node/*"
+      - "hz-client-node/**"
       - "functions/node-handler.js"
   
 

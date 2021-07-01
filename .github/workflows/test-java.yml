@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "hz-client-java/*"
+      - "hz-client-java/**"
       - "functions/java-handler.java"
   
 
