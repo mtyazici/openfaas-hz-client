@@ -88,7 +88,7 @@ jobs:
 
           hey -n 100 -c 1 ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog
 
-          size=$(curl ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog)
+          size=$( echo $(curl ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog) | jq -r '.body')
 
           echo $size
 
