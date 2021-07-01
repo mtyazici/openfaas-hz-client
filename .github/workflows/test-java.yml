@@ -69,8 +69,8 @@ jobs:
         working-directory: openfaas-hz-guide/hz-client-java/of-watchdog
         run: |
           eval $(minikube docker-env)
-          faas-cli build -f hz-client-java-ofwatchdog.yml
           sed -i "s/gateway:*/gateway: ${OPENFAAS_URL}" hz-client-java-ofwatchdog.yml
+          sed -i "s/YOUR_DOCKER_HUB_USERNAME/test-username" hz-client-python-ofwatchdog.yml
 
           faas-cli build -f hz-client-java-ofwatchdog.yml
           faas-cli deploy -f hz-client-java-ofwatchdog.yml
