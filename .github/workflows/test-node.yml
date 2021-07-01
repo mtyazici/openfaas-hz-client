@@ -54,6 +54,7 @@ jobs:
           echo OPENFAAS_URL=${OPENFAAS_URL} >> $GITHUB_ENV
 
           export PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
+          echo PASSWORD=${PASSWORD} >> $GITHUB_ENV
 
           echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 
@@ -69,6 +70,8 @@ jobs:
         working-directory: openfaas-hz-guide/hz-client-node/of-watchdog
         run: |
           eval $(minikube docker-env)
+          echo -n $PASSWORD | faas-cli login --username admin --password-stdin
+
           sed -i "s|gateway: .*|gateway: ${OPENFAAS_URL}|" hz-client-node-ofwatchdog.yml
           sed -i "s/YOUR_DOCKER_HUB_USERNAME/test-username/" hz-client-node-ofwatchdog.yml
 
@@ -78,6 +81,8 @@ jobs:
       - name: Test Function
         working-directory: openfaas-hz-guide/hz-client-node/of-watchdog
         run: |
+          echo -n $PASSWORD | faas-cli login --username admin --password-stdin
+
           hey -n 100 -c 4 ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog
 
           size=$(curl ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog)
