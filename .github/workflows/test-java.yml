@@ -83,6 +83,10 @@ jobs:
       - name: Test Function
         working-directory: openfaas-hz-guide/hz-client-java/of-watchdog
         run: |
+          sleep 30
+
+          kubectl get all -n openfaas-fn
+          kubectl get all -n openfaas
           echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 
           # hey -n 100 -c 1 ${OPENFAAS_URL}/function/hz-client-java-ofwatchdog
