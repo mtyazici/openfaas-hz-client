@@ -70,7 +70,7 @@ jobs:
         run: |
           eval $(minikube docker-env)
           sed -i "s/gateway:*/gateway: ${OPENFAAS_URL}" hz-client-node-ofwatchdog.yml
-          sed -i "s/YOUR_DOCKER_HUB_USERNAME/test-username" hz-client-python-ofwatchdog.yml
+          sed -i "s/YOUR_DOCKER_HUB_USERNAME/test-username" hz-client-node-ofwatchdog.yml
 
           faas-cli build -f hz-client-node-ofwatchdog.yml
           faas-cli deploy -f hz-client-node-ofwatchdog.yml
