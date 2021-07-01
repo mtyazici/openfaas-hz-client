@@ -85,13 +85,13 @@ jobs:
         run: |
           echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 
-          hey -n 100 -c 4 ${OPENFAAS_URL}/function/hz-client-java-ofwatchdog
+          hey -n 100 -c 1 ${OPENFAAS_URL}/function/hz-client-java-ofwatchdog
 
           size=$(curl ${OPENFAAS_URL}/function/hz-client-java-ofwatchdog)
 
           echo $size
 
-          if [[ $size -lte 101  && $size == 97 ]];
+          if [[ $size -lte 101  && $size -gte 97 ]];
           then
             return 0
           else
