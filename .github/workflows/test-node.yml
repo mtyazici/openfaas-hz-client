@@ -92,8 +92,9 @@ jobs:
 
           kubectl get all -n openfaas-fn
 
-          size=$(curl ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog)
+          size_json=$(curl ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog)
 
+          size=$(echo -n $size | jq -r '.size')
           echo $size
 
           if [[ $size -le 101 ]] && [[ $size -ge 100 ]];
