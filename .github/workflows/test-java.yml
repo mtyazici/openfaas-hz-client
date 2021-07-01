@@ -86,7 +86,7 @@ jobs:
       - name: Test Function
         working-directory: openfaas-hz-guide/hz-client-java/of-watchdog
         run: |
-          kubectl get all -n openfaas
+          kubectl get all -n openfaas-fn
 
           kubectl rollout status -n openfaas-fn deployment.apps/hz-client-java-ofwatchdog 
 
