@@ -98,7 +98,7 @@ jobs:
 
           echo $size
 
-          if [[ $size -le 101 ]] && [[ $size -ge 97 ]];
+          if [[ $size -le 101 ]] && [[ $size -ge 100 ]];
           then
             exit 0
           else

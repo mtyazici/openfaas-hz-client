@@ -68,33 +68,39 @@ jobs:
           
 
       - name: Create Function
-        working-directory: openfaas-hz-guide/hz-client-node/of-watchdog
+        working-directory: openfaas-hz-guide/hz-client-java/of-watchdog
         run: |
-          eval $(minikube docker-env)
+          docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
           echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 
-          sed -i "s|gateway: .*|gateway: ${OPENFAAS_URL}|" hz-client-node-ofwatchdog.yml
-          sed -i "s/YOUR_DOCKER_HUB_USERNAME/test-username/" hz-client-node-ofwatchdog.yml
+          sed -i "s|gateway: .*|gateway: ${OPENFAAS_URL}|" hz-client-java-ofwatchdog.yml
+          sed -i "s/YOUR_DOCKER_HUB_USERNAME/${DOCKERHUB_USERNAME}/" hz-client-java-ofwatchdog.yml
 
-          faas-cli build -f hz-client-node-ofwatchdog.yml
-          faas-cli deploy -f hz-client-node-ofwatchdog.yml
+          faas-cli up -f hz-client-java-ofwatchdog.yml
+        env:
+          DOCKERHUB_PASSWORD: ${{secrets.DOCKERHUB_PASSWORD}}
+          DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
 
       - name: Test Function
-        working-directory: openfaas-hz-guide/hz-client-node/of-watchdog
+        working-directory: openfaas-hz-guide/hz-client-java/of-watchdog
         run: |
+          kubectl get all -n openfaas
+
+          kubectl rollout status -n openfaas-fn deployment.apps/hz-client-java-ofwatchdog 
+
           echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 
-          # hey -n 100 -c 1 ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog
+          hey -n 100 -c 1 ${OPENFAAS_URL}/function/hz-client-java-ofwatchdog
 
-          size=$(curl ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog)
+          size=$(curl ${OPENFAAS_URL}/function/hz-client-java-ofwatchdog)
 
           echo $size
 
-          if [[ $size -lte 101  && $size -gte 97 ]];
+          if [[ $size -le 101 ]] && [[ $size -ge 100 ]];
           then
-            return 0
+            exit 0
           else
-            return 1
+            exit 1
           fi
 
 
