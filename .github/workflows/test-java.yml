@@ -71,7 +71,7 @@ jobs:
       - name: Create Function
         working-directory: openfaas-hz-guide/hz-client-java/of-watchdog
         run: |
-          echo -n $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME
+          docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
           echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 
           sed -i "s|gateway: .*|gateway: ${OPENFAAS_URL}|" hz-client-java-ofwatchdog.yml
