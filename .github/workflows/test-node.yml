@@ -66,7 +66,7 @@ jobs:
           
 
       - name: Create Function
-        working-directory: openfaas-hz-guide/hz-client-node
+        working-directory: openfaas-hz-guide/hz-client-node/of-watchdog
         run: |
           eval $(minikube docker-env)
           faas-cli build -f hz-client-node-ofwatchdog.yml
@@ -76,7 +76,7 @@ jobs:
           faas-cli deploy -f hz-client-node-ofwatchdog.yml
 
       - name: Test Function
-        working-directory: openfaas-hz-guide/hz-client-node
+        working-directory: openfaas-hz-guide/hz-client-node/of-watchdog
         run: |
           hey -n 100 -c 4 ${OPENFAAS_URL}/function/hz-client-node-ofwatchdog
 
