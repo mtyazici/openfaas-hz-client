@@ -35,7 +35,7 @@ public class Handler extends com.openfaas.model.AbstractHandler {
     public IResponse Handle(IRequest req) {
         Response res = new Response();
         Random random = new Random();
-        int randomKey = random.nextInt(100_000);
+        int randomKey = random.nextInt(1_000_000);
         this.map.put("key-" + randomKey, "value-" + randomKey);
 	    res.setBody(String.valueOf(this.map.size()));
 	    return res;
