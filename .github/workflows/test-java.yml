@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - "hz-client-java/**"
-      - "functions/java-handler.java"
   
 
 jobs:
@@ -19,13 +18,11 @@ jobs:
         run: |
            curl -sSL https://cli.openfaas.com | sudo -E sh
 
-
       - name: Install Hey
         run: |
           wget https://hey-release.s3.us-east-2.amazonaws.com/hey_linux_amd64
           chmod +x hey_linux_amd64
           sudo mv hey_linux_amd64 /bin/hey
-
 
       - name: Checkout to guide
         uses: actions/checkout@v2
@@ -60,14 +57,12 @@ jobs:
 
           echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 
-
       - name: Deploy Hazelcast Cluster
         run: |
           helm repo add hazelcast https://hazelcast-charts.s3.amazonaws.com/
           helm repo update
           helm install hz-hazelcast hazelcast/hazelcast
-          
-
+        
       - name: Create Function
         working-directory: openfaas-hz-guide/hz-client-java/of-watchdog
         run: |
@@ -81,7 +76,6 @@ jobs:
         env:
           DOCKERHUB_PASSWORD: ${{secrets.DOCKERHUB_PASSWORD}}
           DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
-
 
       - name: Test Function
         working-directory: openfaas-hz-guide/hz-client-java/of-watchdog

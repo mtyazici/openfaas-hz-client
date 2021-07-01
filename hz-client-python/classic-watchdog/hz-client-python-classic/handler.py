@@ -8,13 +8,14 @@ client = hazelcast.HazelcastClient(
 
 my_map = client.get_map("map").blocking()
 
+
 def handle(req):
     """handle a request to the function
     Args:
         req (str): request body
     """
-    ran_val = random.randint(1,100000)
-    
+    ran_val = random.randint(1, 1000000)
+
     my_map.put(f"{ran_val}", "value")
 
     return str(my_map.size())
