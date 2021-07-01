@@ -93,15 +93,15 @@ jobs:
 
   slack_notify:
     name: Slack Notify
-    needs: test 
+    needs: test-python 
     runs-on: ubuntu-latest
     if: always()
     steps:
       - uses: 8398a7/action-slack@f3635935f58910a6d6951b73efe9037c960c8c04
-        if: needs.test.result != 'success'
+        if: needs.test-python.result != 'success'
         with:
           fields: repo,commit,author,action,eventName,workflow
-          status: ${{ needs.test.result }}
+          status: ${{ needs.test-python.result }}
           channel: '#github-actions-log'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
